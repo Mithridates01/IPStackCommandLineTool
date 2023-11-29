@@ -1,0 +1,11 @@
+version: '3'
+services:
+  ipstack-cli-tool:
+    build: .
+    image: ipstack-cli-tool
+    volumes:
+      - .:/usr/src/ipstackiptool
+    entrypoint: ["python3", "./main.py"]
+    command: ["--help"]
+    environment:
+      - IPSTACKACCESSKEY=access_key

@@ -1,4 +1,7 @@
 node_modules/
 tmp/
 .vscode
+.vscode/*
+.vscode/launch.json
 __pycache__
+.vscode/launch.json

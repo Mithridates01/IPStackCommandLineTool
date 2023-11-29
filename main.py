@@ -46,3 +46,43 @@ def cmd_line_interface():
     sys.exit()
 
   return args
+
+def main():
+  logging.basicConfig(level=logging.INFO)
+  
+  cmd_args = cmd_line_interface()
+
+  ipstack_api = IPStackAPI(cmd_args.access_key)
+  # TODO: IP list validation is done in arg parse type setting. 
+  #   May be better to validate each and ips that aren't valid 
+  #   provide feedback in console to user like:
+  #   # out of # IPs were invalid return defective ips 10 per line
+  ips = [ip.strip() for ip in cmd_args.locate_ips]
+  
+  if len(ips) > 1:
+    bulk_ip_lookup_response = ipstack_api.ipstack_bulk_ip_location_lookup(ips)
+    # TODO: Implement with paid API features.
+    print(bulk_ip_lookup_response["error"]["info"])
+    sys.exit()
+
+    # Return dict of {"ip": "location"} or {"ip": {...location_details...}} if --full
+    if cmd_args.full:
+      bulk_ip_lookup_response = {obj["ip"]: obj for obj in bulk_ip_lookup_response}
+      print(json.dumps(bulk_ip_lookup_response))
+    else:
+      bulk_ip_lookup_response = {obj["ip"]: ('(' + obj['longitude'] + ',' + obj['latitude']+')') for obj in bulk_ip_lookup_response}
+      print(json.dumps(bulk_ip_lookup_response))
+  else:
+    single_ip_lookup_response = ipstack_api.ipstack_ip_location_lookup(ips[0])
+    
+    # Return dict of {"ip": "location"} or {"ip": {...location_details...}} if --full
+    if cmd_args.full:
+      print(json.dumps({single_ip_lookup_response["ip"]: single_ip_lookup_response}))
+    else:
+      gps_coordinates = "("+ str(single_ip_lookup_response["latitude"]) + "," + str(single_ip_lookup_response["longitude"]) + ")"
+      print(f"{gps_coordinates}")
+
+
+
+if __name__ == "__main__":
+    main()
